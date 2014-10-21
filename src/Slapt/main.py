@@ -25,7 +25,6 @@ Created on 21 Oct 2014
 
 
 from PyQt4 import QtGui
-from PyQt4.Qt import QAction, QVariant
 from PyQt4.QtCore import Qt, QTimer
 
 from Slapt.constants import *
@@ -73,12 +72,31 @@ class MainScreen(QtGui.QMainWindow):
         Handles key presses anywhere in the program.
         '''
         
-        keyVal = event.nativeScanCode()
-        
-        print("Pressed key",hex(keyVal))
+        if event.key() in [Qt.Key_Control, Qt.Key_Meta]: # Either a Ctrl key in Windows and Linux, or the Command key of a Mac
+            if int(event.nativeScanCode()) < 80:
+                # This is a messy work around, and may not always work.
+                # scan code gave 25 and 285 on my Windows 7 machine, and 37 and 105 on my Ubuntu machine for L and R Ctrl respectively.
+                # It would be better if Qt could tell L and R Ctrl apart, but it seems that it can't. 
+                print("Left Ctrl pressed")
+            else:
+                print("Right Ctrl pressed")
 
-        pass
     
+    def keyReleaseEvent(self, event):
+        '''
+        Handles key presses anywhere in the program.
+        '''
+        
+        keyScanCode = event.nativeScanCode()
+        if event.key() in [Qt.Key_Control, Qt.Key_Meta]: # Either a Ctrl key in Windows and Linux, or the Command key of a Mac
+            if int(event.nativeScanCode()) < 80:
+                # This is a messy work around, and I'm not sure it will always work.
+                print("Left Ctrl released",int(event.nativeScanCode()))
+            else:
+                print("Right Ctrl released",int(event.nativeScanCode()))
+            
+            
+             
         
     def initUI(self):
         '''
