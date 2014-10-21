@@ -91,6 +91,14 @@ class MainScreen(QtGui.QMainWindow):
                 self.ctrlkeytracker[1] = self.ctrlkeytracker[0]
                 self.ctrlkeytracker[0] += 1
             self.handleCtrlSituation()
+        
+        if event.key() == Qt.Key_Space and not event.isAutoRepeat():
+            if self.puzzleTimer.isRunning():
+                self.puzzleTimer.stop()
+                self.justStopped = True
+
+        print (int(event.key()))
+        
 
         if debugModeEnabled:
             if event.key() == Qt.Key_A:
@@ -118,6 +126,13 @@ class MainScreen(QtGui.QMainWindow):
                 self.ctrlkeytracker[1] = self.ctrlkeytracker[0]
                 self.ctrlkeytracker[0] -= 1
             self.handleCtrlSituation()
+
+        if event.key() == Qt.Key_Space and not event.isAutoRepeat():
+            if self.justStopped:
+                self.justStopped = False
+                # Prevents the timer from restarting once a Ctrl key is released after stopping.
+            elif not self.puzzleTimer.isRunning():
+                self.puzzleTimer.start()
             
             
              
@@ -186,6 +201,10 @@ class MainScreen(QtGui.QMainWindow):
         
         
 class StretchedLabel(QtGui.QLabel):
+    '''
+    A label with centred text that automatically resizes the font to fill the available space 
+    '''
+    
     def __init__(self, *args, **kwargs):
         QtGui.QLabel.__init__(self, *args, **kwargs)
         self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
@@ -193,7 +212,6 @@ class StretchedLabel(QtGui.QLabel):
 
     def resizeEvent(self, evt):
         font = self.font()
-        print(self.height(), self.width())
         newSize = min(self.height() * 0.7, self.width() / 8)
         font.setPixelSize(newSize)
         self.setFont(font)    
