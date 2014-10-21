@@ -28,6 +28,8 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import Qt, QTimer
 
 from Slapt.constants import *
+from Slapt.timer import PuzzleTimer
+from Slapt.utilities import timeToStr
 
 
 class MainScreen(QtGui.QMainWindow):
@@ -49,6 +51,10 @@ class MainScreen(QtGui.QMainWindow):
         Initialises variables that need to be set before the GUI is initialised.
         '''
         
+        self.ctrlkeytracker = [0, 0] # Keeps track of how many Ctrl keys are pressed now [0], and how many were pressed before the last change [1].
+        self.puzzleTimer = PuzzleTimer()
+        self.justStopped = False
+        
         pass
         
     
@@ -58,8 +64,8 @@ class MainScreen(QtGui.QMainWindow):
         '''
         
         
-                
-                
+        currentTime = self.puzzleTimer.getTime()         
+        self.timerDisplay.setText(timeToStr(currentTime, nDigits))
 
             
             
@@ -77,9 +83,14 @@ class MainScreen(QtGui.QMainWindow):
                 # This is a messy work around, and may not always work.
                 # scan code gave 25 and 285 on my Windows 7 machine, and 37 and 105 on my Ubuntu machine for L and R Ctrl respectively.
                 # It would be better if Qt could tell L and R Ctrl apart, but it seems that it can't. 
-                print("Left Ctrl pressed")
+                # print("Left Ctrl pressed")
+                self.ctrlkeytracker[1] = self.ctrlkeytracker[0]
+                self.ctrlkeytracker[0] += 1
             else:
-                print("Right Ctrl pressed")
+                # print("Right Ctrl pressed")
+                self.ctrlkeytracker[1] = self.ctrlkeytracker[0]
+                self.ctrlkeytracker[0] += 1
+            self.handleCtrlSituation()
 
     
     def keyReleaseEvent(self, event):
@@ -91,9 +102,14 @@ class MainScreen(QtGui.QMainWindow):
         if event.key() in [Qt.Key_Control, Qt.Key_Meta]: # Either a Ctrl key in Windows and Linux, or the Command key of a Mac
             if int(event.nativeScanCode()) < 80:
                 # This is a messy work around, and I'm not sure it will always work.
-                print("Left Ctrl released",int(event.nativeScanCode()))
+                # print("Left Ctrl released")
+                self.ctrlkeytracker[1] = self.ctrlkeytracker[0]
+                self.ctrlkeytracker[0] -= 1
             else:
-                print("Right Ctrl released",int(event.nativeScanCode()))
+                # print("Right Ctrl released")
+                self.ctrlkeytracker[1] = self.ctrlkeytracker[0]
+                self.ctrlkeytracker[0] -= 1
+            self.handleCtrlSituation()
             
             
              
@@ -106,9 +122,9 @@ class MainScreen(QtGui.QMainWindow):
         timerWindow = QtGui.QWidget()
 
         
-        timerDisplay = QtGui.QLabel("0:00.00")
+        self.timerDisplay = QtGui.QLabel("0:00.00")
         
-        self.setCentralWidget(timerDisplay)
+        self.setCentralWidget(self.timerDisplay)
 
         exitAction = QtGui.QAction(QtGui.QIcon(''), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -135,3 +151,30 @@ class MainScreen(QtGui.QMainWindow):
         '''
         
         pass
+    
+    def handleCtrlSituation(self):
+        '''
+        Deals with starting and stopping the timer depending on the current Ctrl situation.
+        Should only be called in keyPressEvent or keyReleaseEvent if the Ctrl key was involved in the event. 
+        '''
+        
+        if self.justStopped:
+            self.justStopped = False
+            return
+        
+        print("Running:", self.puzzleTimer.isRunning(), "... Ctrl keys pressed:", self.ctrlkeytracker)
+        if self.puzzleTimer.isRunning():
+            if self.ctrlkeytracker[0] == 2:
+                self.puzzleTimer.stop()
+                self.justStopped = True
+        else:
+            if self.ctrlkeytracker == [1,2]:
+                self.puzzleTimer.start()
+                    
+        
+        
+        
+    
+    
+    
+    

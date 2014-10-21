@@ -92,7 +92,7 @@ def test():
         print("Running:", timer.isRunning(), " Time:", timer.getTime())
     timer.stop()
     
-        print("Running:", timer.isRunning(), " Time:", timer.getTime())
+    print("Running:", timer.isRunning(), " Time:", timer.getTime())
     
     
          
