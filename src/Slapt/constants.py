@@ -42,6 +42,8 @@ padKeys = [Qt.Key]
 Key_LeftCtrl = 37
 Key_RightCtrl = 105
 
+magicWidthSizeFactor = 8 # The maximum width to height ratio of the time display
+
 
 
 

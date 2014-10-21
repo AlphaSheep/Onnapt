@@ -97,9 +97,6 @@ class MainScreen(QtGui.QMainWindow):
                 self.puzzleTimer.stop()
                 self.justStopped = True
 
-        print (int(event.key()))
-        
-
         if debugModeEnabled:
             if event.key() == Qt.Key_A:
                 self.puzzleTimer.startTime -= 60
@@ -209,10 +206,14 @@ class StretchedLabel(QtGui.QLabel):
         QtGui.QLabel.__init__(self, *args, **kwargs)
         self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         self.setAlignment(Qt.AlignCenter)
+        
+        font = self.font()
+        font.setBold(True)
+        self.setFont(font)
 
     def resizeEvent(self, evt):
         font = self.font()
-        newSize = min(self.height() * 0.7, self.width() / 8)
+        newSize = min(self.height() * 0.7, self.width() / magicWidthSizeFactor)
         font.setPixelSize(newSize)
         self.setFont(font)    
     
