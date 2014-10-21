@@ -92,6 +92,14 @@ class MainScreen(QtGui.QMainWindow):
                 self.ctrlkeytracker[0] += 1
             self.handleCtrlSituation()
 
+        if debugModeEnabled:
+            if event.key() == Qt.Key_A:
+                self.puzzleTimer.startTime -= 60
+            if event.key() == Qt.Key_S:
+                self.puzzleTimer.startTime -= 600
+            if event.key() == Qt.Key_D:
+                self.puzzleTimer.startTime -= 3600
+            
     
     def keyReleaseEvent(self, event):
         '''
@@ -122,7 +130,7 @@ class MainScreen(QtGui.QMainWindow):
         timerWindow = QtGui.QWidget()
 
         
-        self.timerDisplay = QtGui.QLabel("0:00.00")
+        self.timerDisplay = StretchedLabel("0:00.00")
         
         self.setCentralWidget(self.timerDisplay)
 
@@ -160,21 +168,35 @@ class MainScreen(QtGui.QMainWindow):
         
         if self.justStopped:
             self.justStopped = False
+            # Prevents the timer from restarting once a Ctrl key is released after stopping.
             return
         
         print("Running:", self.puzzleTimer.isRunning(), "... Ctrl keys pressed:", self.ctrlkeytracker)
         if self.puzzleTimer.isRunning():
             if self.ctrlkeytracker[0] == 2:
+                # If the timer was running, and both Ctrl keys are pressed.
                 self.puzzleTimer.stop()
                 self.justStopped = True
         else:
             if self.ctrlkeytracker == [1,2]:
+                # If the timer was not running, and one Ctrl key is released after both having been pressed.                
                 self.puzzleTimer.start()
                     
         
         
         
-    
+class StretchedLabel(QtGui.QLabel):
+    def __init__(self, *args, **kwargs):
+        QtGui.QLabel.__init__(self, *args, **kwargs)
+        self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+        self.setAlignment(Qt.AlignCenter)
+
+    def resizeEvent(self, evt):
+        font = self.font()
+        print(self.height(), self.width())
+        newSize = min(self.height() * 0.7, self.width() / 8)
+        font.setPixelSize(newSize)
+        self.setFont(font)    
     
     
     

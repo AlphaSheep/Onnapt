@@ -27,6 +27,9 @@ Created on 21 Oct 2014
 from PyQt4.QtCore import Qt
 
 
+debugModeEnabled = True
+
+
 settingsFileName = 'settings.txt'
 targetFPS = 30
 
@@ -38,6 +41,8 @@ padKeys = [Qt.Key]
 
 Key_LeftCtrl = 37
 Key_RightCtrl = 105
+
+
 
 
 if __name__ == '__main__':
