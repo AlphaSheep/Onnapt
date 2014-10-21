@@ -25,7 +25,10 @@ Created on 21 Oct 2014
 
 
 from PyQt4 import QtGui
+from PyQt4.Qt import QAction, QVariant
 from PyQt4.QtCore import Qt, QTimer
+
+from Slapt.constants import *
 
 
 class MainScreen(QtGui.QMainWindow):
@@ -34,12 +37,13 @@ class MainScreen(QtGui.QMainWindow):
 
         super(MainScreen, self).__init__() # Call the constructor of this class's parent        
         self.prepare()
+        self.loadSettings()
         
         self.initUI()
         
-        # self.fpsTimer = QTimer()
-        # self.fpsTimer.timeout.connect(self.updateDisplay)
-        # self.fpsTimer.start(1000/targetFPS) # set targetFPS in constants.
+        self.fpsTimer = QTimer()
+        self.fpsTimer.timeout.connect(self.updateDisplay)
+        self.fpsTimer.start(1000/targetFPS) # set targetFPS in constants.
         
     def prepare(self):
         '''
@@ -47,45 +51,69 @@ class MainScreen(QtGui.QMainWindow):
         '''
         
         pass
+        
     
     def updateDisplay(self):
         '''
         Updates the display
         '''
         
+        
+                
+                
+
+            
+            
+   
         pass
+    
     
     def keyPressEvent(self, event):
         '''
         Handles key presses anywhere in the program.
         '''
         
-        pass
+        keyVal = event.nativeScanCode()
+        
+        print("Pressed key",hex(keyVal))
 
+        pass
+    
         
     def initUI(self):
         '''
         Initialises the UI layout and widgets.
         '''
         
-        textEdit = QtGui.QTextEdit()
-        self.setCentralWidget(textEdit)
+        timerWindow = QtGui.QWidget()
+
+        
+        timerDisplay = QtGui.QLabel("0:00.00")
+        
+        self.setCentralWidget(timerDisplay)
 
         exitAction = QtGui.QAction(QtGui.QIcon(''), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.close)
 
-        self.statusBar()
+        self.statusBar().showMessage("Ready")
 
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAction)
 
-        toolbar = self.addToolBar('Exit')
-        toolbar.addAction(exitAction)
+        # toolbar = self.addToolBar('Exit')
+        # toolbar.addAction(exitAction)
         
         self.setGeometry(300, 300, 350, 250)
         self.setWindowTitle('Main window')    
         self.show()        
             
+            
+    def loadSettings(self):
+        '''
+        If a settings file exists, then the settings are loaded from it. These override the default values.
+        '''
+        
+        pass

@@ -33,7 +33,6 @@ def main():
     app = QtGui.QApplication(sys.argv)
     mainScreen = MainScreen() #@UnusedVariable used to prevent prevent premature garbage collection
     mainScreen.clipboard = app.clipboard()
-    print("!!!")
     sys.exit(app.exec_())
     
 
