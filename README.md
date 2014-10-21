@@ -1,4 +1,4 @@
-Statistics Lover's Awesome Puzzle Timer (SLAPT)
+Statistics Lover's Awesome Puzzle Timer (Slapt)
 ===============================================
 
 *Slapt* is going to be a cross platform timer application for twisty puzzles such as Rubik's cube. It is still in the early development phase.
