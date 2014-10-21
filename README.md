@@ -3,6 +3,11 @@ Statistics Lover's Awesome Puzzle Timer (SLAPT)
 
 *Slapt* is going to be a cross platform timer application for twisty puzzles such as Rubik's cube. It is still in the early development phase.
 
+Three features will differentiate *Slapt* from other timing applications:
+ * Extensive history tracking, which allows exporting and importing times from other devices, and possible syncronising through Dropbox.
+ * Calculation of a wide range of stats, which may be extended using plugins (which will be Python scripts)
+ * Support custom scrambles as additional plugins
+
 It is being written in Python 3 using PyQt.
 
 License
@@ -41,7 +46,7 @@ The following feature wish list was compiled from the answers:
  * Simple configuration
  * Open source
  * Simple default view
- * Multiple profiles
+ * Multiple profiles, so several people can share a computer
  * Database export/backup
  * Show best Ao5 and Ao12
 
