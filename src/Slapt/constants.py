@@ -28,10 +28,12 @@ from PyQt4.QtCore import Qt
 
 
 debugModeEnabled = True
-
-
-settingsFileName = 'settings.txt'
 targetFPS = 30
+
+
+settingsFileName = 'laststate.cfg'
+
+acceptedInputMethods = ['Space', 'Ctrl']
 
 magicWidthSizeFactor = 8 # The maximum width to height ratio of the time display
 magicHeightSizeFactor = 0.9 # The maximum fraction of the available height that may be used by the timer display 

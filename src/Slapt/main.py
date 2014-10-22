@@ -60,6 +60,11 @@ class MainScreen(QtGui.QMainWindow):
         self.decimalPlaces = 2
         self.inputMethod = 'Space'
         
+        self.lastWindowLeft = 300
+        self.lastWindowTop = 300
+        self.lastWindowWidth = 350
+        self.lastWindowHeight = 250
+        
         pass
         
     
@@ -155,7 +160,7 @@ class MainScreen(QtGui.QMainWindow):
         # toolbar = self.addToolBar('Exit')
         # toolbar.addAction(exitAction)
         
-        self.setGeometry(300, 300, 350, 250)
+        self.setGeometry(self.lastWindowLeft, self.lastWindowTop, self.lastWindowWidth, self.lastWindowHeight)
         self.setWindowTitle('Main window')    
         self.show()        
             
@@ -181,7 +186,7 @@ class MainScreen(QtGui.QMainWindow):
         
         optionsMenu = menubar.addMenu('&Options')
 
-        self.optDecimalsChangeAction = QtGui.QAction('&Decimal Places: 2', self)
+        self.optDecimalsChangeAction = QtGui.QAction("&Decimal places: "+str(self.decimalPlaces), self)
         self.optDecimalsChangeAction.triggered.connect(self.changeDecimalPlaces)
         optionsMenu.addAction(self.optDecimalsChangeAction)
 
@@ -206,7 +211,54 @@ class MainScreen(QtGui.QMainWindow):
         If a settings file exists, then the settings are loaded from it. These override the default values.
         '''
         
-        pass
+        try:
+            with open(settingsFileName) as settingsFile:
+                settings = settingsFile.readlines()
+        except IOError:
+            print("Couldn't read last state from file. Ignoring...")
+            return
+            
+        for i in range(len(settings)):
+            try:
+                thisLine = settings[i].strip()
+                line = thisLine.split(' ')                
+                
+                if line[0] == 'SIZE':
+                    self.lastWindowWidth = int(line[1])
+                    self.lastWindowHeight = int(line[2])     
+
+                elif line[0] == 'POSITION':
+                    self.lastWindowLeft = int(line[1])
+                    self.lastWindowTop = int(line[2])
+                    
+                elif line[0] == 'TIME_DECMAL_PLACES':
+                    self.decimalPlaces = int(line[1])
+                
+                elif line[0] == 'INPUT_METHOD':
+                    if line[1] in acceptedInputMethods:
+                        self.inputMethod = line[1]
+
+            
+            except:
+                print("Error reading line",i,"in settings file")
+                print("    "+settings[i].strip())
+            
+                    
+    
+            
+    def saveSettings(self):
+        '''
+        If a settings file exists, then the settings are loaded from it. These override the default values.
+        '''
+        
+        with open(settingsFileName, 'w') as settingsFile:
+            settingsFile.write('POSITION '+str(self.geometry().left())+' '+str(self.geometry().top())+'\n')
+            settingsFile.write('SIZE '+str(self.width())+' '+str(self.height())+'\n')
+            settingsFile.write('TIME_DECMAL_PLACES '+str(self.decimalPlaces)+'\n')
+            settingsFile.write('INPUT_METHOD '+self.inputMethod+'\n')
+
+
+        
     
     def handleCtrlSituation(self):
         '''
@@ -240,7 +292,7 @@ class MainScreen(QtGui.QMainWindow):
         else:
             self.decimalPlaces = 2
             
-        self.optDecimalsChangeAction.setText("Decimal places: "+str(self.decimalPlaces))
+        self.optDecimalsChangeAction.setText("&Decimal places: "+str(self.decimalPlaces))
         
         
         
@@ -255,14 +307,13 @@ class MainScreen(QtGui.QMainWindow):
             
     
         
-    def close(self, *args, **kwargs):
+    def closeEvent(self, *args, **kwargs):
         '''
         Performs additional tasks before closing
         '''
         
-        print("Finished")
+        self.saveSettings()
         
-        super(MainScreen, self).close() # Call the inherited close function
         
         
 class StretchedLabel(QtGui.QLabel):
