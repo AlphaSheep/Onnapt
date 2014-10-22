@@ -58,6 +58,7 @@ class MainScreen(QtGui.QMainWindow):
         self.inspectionTimer = PuzzleTimer()
         self.justStopped = False
         self.justStartedInspection = False
+        self.timerReady = True
         
         self.inspectionTimeLimit = 15
         self.inspectionEnabled = 1
@@ -299,7 +300,9 @@ class MainScreen(QtGui.QMainWindow):
         Deals with starting and stopping the timer depending on the current Ctrl situation.
         Should only be called in keyPressEvent or keyReleaseEvent if the Ctrl key was involved in the event. 
         '''
-        
+        if self.ctrlkeytracker[0]==0 and not self.inspectionTimer.isRunning() and not self.puzzleTimer.isRunning():
+            self.timerReady = True
+       
         if self.justStopped:
             self.justStopped = False
             # Prevents the timer from restarting once a Ctrl key is released after stopping.
@@ -312,12 +315,14 @@ class MainScreen(QtGui.QMainWindow):
                 self.justStopped = True
         else:
             if self.ctrlkeytracker == [1,2]:
-                # If the timer was not running, and one Ctrl key is released after both having been pressed.                
-                self.inspectionTimer.stop()
-                self.puzzleTimer.start()
+                # If the timer was not running, and one Ctrl key is released after both having been pressed.
+                if self.inspectionTimer.isRunning() or self.timerReady:                
+                    self.inspectionTimer.stop()
+                    self.puzzleTimer.start()
             
-            elif self.inspectionEnabled and self.ctrlkeytracker == [1, 0]:
+            elif self.inspectionEnabled and self.timerReady and self.ctrlkeytracker == [1, 0]:
                 self.inspectionTimer.start()
+                self.timerReady = False
                 
                     
                     
