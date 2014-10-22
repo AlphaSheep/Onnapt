@@ -51,11 +51,34 @@ def timeToStr(time, nDecimals = 2):
         return ("{:d}:{:0>2d}:{:0>2d}.{:0>"+str(nDecimals)+"d}").format(hours, minutes, seconds, subseconds)
         
 
+def makeAllWhitespaceSpaces(string):
+    '''
+    Replaces all whitespace in a string with spaces. Multiple spaces are replaced by a single space. 
+    '''
+    lineString = string.strip()
+    lastWasSpace = False
+    newLineString = ''
+    for j in range(len(lineString)):
+        if lineString[j] in ['\t', ' ']:
+            if not lastWasSpace:
+                newLineString += ' '
+                lastWasSpace = True
+        else: 
+            newLineString += lineString[j]
+            lastWasSpace = False
+    return newLineString
+
+
 
 def test():
     testTimes = [0, 0.554654, 5.2546, 25.45869476 , 124.23124, 3599.8888, 3600, 3601, 4854.546546]
     for t in testTimes:
-        print(timeToStr(t,3), "    ", t)
+        print(timeToStr(t,2), "    ", t)
+        
+    print()
+    print()
+    print(makeAllWhitespaceSpaces('   SIZE         804\t\t\t   532'))
+    
         
 
 if __name__ == '__main__':

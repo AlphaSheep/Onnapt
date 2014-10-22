@@ -29,7 +29,7 @@ from PyQt4.QtCore import Qt, QTimer
 
 from Slapt.constants import *
 from Slapt.timer import PuzzleTimer
-from Slapt.utilities import timeToStr
+from Slapt.utilities import timeToStr, makeAllWhitespaceSpaces
 
 
 class MainScreen(QtGui.QMainWindow):
@@ -220,8 +220,7 @@ class MainScreen(QtGui.QMainWindow):
             
         for i in range(len(settings)):
             try:
-                thisLine = settings[i].strip()
-                line = thisLine.split(' ')                
+                line = makeAllWhitespaceSpaces(settings[i]).split(' ')
                 
                 if line[0] == 'SIZE':
                     self.lastWindowWidth = int(line[1])
