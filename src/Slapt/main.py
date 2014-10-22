@@ -55,11 +55,16 @@ class MainScreen(QtGui.QMainWindow):
         
         self.ctrlkeytracker = [0, 0] # Keeps track of how many Ctrl keys are pressed now [0], and how many were pressed before the last change [1].
         self.puzzleTimer = PuzzleTimer()
+        self.inspectionTimer = PuzzleTimer()
         self.justStopped = False
+        self.justStartedInspection = False
+        
+        self.inspectionTimeLimit = 15
+        self.inspectionEnabled = 1
         
         self.decimalPlaces = 2
         self.inputMethod = 'Space'
-        
+                
         self.lastWindowLeft = 300
         self.lastWindowTop = 300
         self.lastWindowWidth = 350
@@ -73,9 +78,13 @@ class MainScreen(QtGui.QMainWindow):
         Updates the display
         '''
         
-        
-        currentTime = self.puzzleTimer.getTime()         
-        self.timerDisplay.setText(timeToStr(currentTime, self.decimalPlaces))
+        if self.inspectionTimer.isRunning():
+            currentTime = self.inspectionTimeLimit - self.inspectionTimer.getTime() + 1
+            self.timerDisplay.setText(timeToStr(currentTime, 0))
+            
+        else:
+            currentTime = self.puzzleTimer.getTime()         
+            self.timerDisplay.setText(timeToStr(currentTime, self.decimalPlaces))
 
             
             
@@ -103,9 +112,13 @@ class MainScreen(QtGui.QMainWindow):
             self.handleCtrlSituation()
         
         if self.inputMethod == 'Space' and event.key() == Qt.Key_Space and not event.isAutoRepeat():
+            self.justStartedInspection = False
             if self.puzzleTimer.isRunning():
                 self.puzzleTimer.stop()
                 self.justStopped = True
+            elif self.inspectionEnabled and not self.inspectionTimer.isRunning():                
+                self.inspectionTimer.start()
+                self.justStartedInspection = True
 
         if debugModeEnabled:
             if event.key() == Qt.Key_A:
@@ -137,7 +150,8 @@ class MainScreen(QtGui.QMainWindow):
             if self.justStopped:
                 self.justStopped = False
                 # Prevents the timer from restarting once a Ctrl key is released after stopping.
-            elif not self.puzzleTimer.isRunning():
+            elif not self.puzzleTimer.isRunning() and not self.justStartedInspection:
+                self.inspectionTimer.stop()
                 self.puzzleTimer.start()
             
             
@@ -233,10 +247,14 @@ class MainScreen(QtGui.QMainWindow):
                 elif line[0] == 'TIME_DECMAL_PLACES':
                     self.decimalPlaces = int(line[1])
                 
-                elif line[0] == 'INPUT_METHOD':
-                    if line[1] in acceptedInputMethods:
-                        self.inputMethod = line[1]
+                elif line[0] == 'INPUT_METHOD' and line[1] in acceptedInputMethods:
+                    self.inputMethod = line[1]
 
+                elif line[0] == 'INSPECTION_ENABLED' and line[1] in ['0','1']:                    
+                    self.inspectionEnabled = int(line[1])
+
+                elif line[0] == 'INSPECTION_TIME':
+                    self.inspectionTimeLimit = int(line[1])
             
             except:
                 print("Error reading line",i,"in settings file")
@@ -255,6 +273,8 @@ class MainScreen(QtGui.QMainWindow):
             settingsFile.write('SIZE '+str(self.width())+' '+str(self.height())+'\n')
             settingsFile.write('TIME_DECMAL_PLACES '+str(self.decimalPlaces)+'\n')
             settingsFile.write('INPUT_METHOD '+self.inputMethod+'\n')
+            settingsFile.write('INSPECTION_ENABLED '+str(self.inspectionEnabled)+'\n')
+            settingsFile.write('INSPECTION_TIME '+str(self.inspectionTimeLimit)+'\n')
 
 
         
@@ -278,7 +298,12 @@ class MainScreen(QtGui.QMainWindow):
         else:
             if self.ctrlkeytracker == [1,2]:
                 # If the timer was not running, and one Ctrl key is released after both having been pressed.                
+                self.inspectionTimer.stop()
                 self.puzzleTimer.start()
+            
+            elif self.inspectionEnabled and self.ctrlkeytracker == [1, 0]:
+                self.inspectionTimer.start()
+                
                     
                     
     def changeDecimalPlaces(self):

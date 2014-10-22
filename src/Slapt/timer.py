@@ -33,6 +33,7 @@ class PuzzleTimer():
         self.endTime = 0
         self.running = False
         
+        
     def start(self):
         '''
         Starts the timer if it is not already started.
@@ -41,6 +42,7 @@ class PuzzleTimer():
             self.startTime = time.time()
             self.running = True
         
+        
     def stop(self):
         '''
         Stops the timer if it is running
@@ -48,6 +50,7 @@ class PuzzleTimer():
         if self.running:
             self.endTime = time.time()
             self.running = False
+        
             
     def getTime(self):
         '''
@@ -58,6 +61,7 @@ class PuzzleTimer():
             return (self.currentTime - self.startTime)
         else:
             return (self.endTime - self.startTime)
+        
         
     def isRunning(self):
         '''

@@ -36,19 +36,24 @@ def timeToStr(time, nDecimals = 2):
     '''
     factor = (10**nDecimals)
     subseconds = int((time % 1) * factor)
+
+    if nDecimals > 0:
+        subsecondsString = ".{:0>"+str(nDecimals)+"d}"
+    else:
+        subsecondsString = ""
     
     if time < 60:
         seconds = int(time)
-        return ("{:d}.{:0>"+str(nDecimals)+"d}").format(seconds, subseconds)
+        return ("{:d}"+subsecondsString).format(seconds, subseconds)
     elif time < 3600:
         seconds = int(time % 60)
         minutes = int(time // 60)
-        return ("{:d}:{:0>2d}.{:0>"+str(nDecimals)+"d}").format(minutes, seconds, subseconds)
+        return ("{:d}:{:0>2d}"+subsecondsString).format(minutes, seconds, subseconds)
     else:
         seconds = int(time % 60)
         minutes = int((time / 60) % 60)
         hours = int(time // 3600)
-        return ("{:d}:{:0>2d}:{:0>2d}.{:0>"+str(nDecimals)+"d}").format(hours, minutes, seconds, subseconds)
+        return ("{:d}:{:0>2d}:{:0>2d}"+subsecondsString).format(hours, minutes, seconds, subseconds)
         
 
 def makeAllWhitespaceSpaces(string):
