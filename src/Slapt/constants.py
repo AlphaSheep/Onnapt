@@ -33,16 +33,8 @@ debugModeEnabled = True
 settingsFileName = 'settings.txt'
 targetFPS = 30
 
-nDigits = 3
-
-primaryStartKey = Qt.Key_Space
-padKeys = [Qt.Key]
-
-
-Key_LeftCtrl = 37
-Key_RightCtrl = 105
-
 magicWidthSizeFactor = 8 # The maximum width to height ratio of the time display
+magicHeightSizeFactor = 0.9 # The maximum fraction of the available height that may be used by the timer display 
 
 
 

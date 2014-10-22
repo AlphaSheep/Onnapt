@@ -42,9 +42,11 @@ class MainScreen(QtGui.QMainWindow):
         
         self.initUI()
         
+       
         self.fpsTimer = QTimer()
         self.fpsTimer.timeout.connect(self.updateDisplay)
         self.fpsTimer.start(1000/targetFPS) # set targetFPS in constants.
+        
         
     def prepare(self):
         '''
@@ -54,6 +56,9 @@ class MainScreen(QtGui.QMainWindow):
         self.ctrlkeytracker = [0, 0] # Keeps track of how many Ctrl keys are pressed now [0], and how many were pressed before the last change [1].
         self.puzzleTimer = PuzzleTimer()
         self.justStopped = False
+        
+        self.decimalPlaces = 2
+        self.inputMethod = 'Space'
         
         pass
         
@@ -65,7 +70,7 @@ class MainScreen(QtGui.QMainWindow):
         
         
         currentTime = self.puzzleTimer.getTime()         
-        self.timerDisplay.setText(timeToStr(currentTime, nDigits))
+        self.timerDisplay.setText(timeToStr(currentTime, self.decimalPlaces))
 
             
             
@@ -78,7 +83,7 @@ class MainScreen(QtGui.QMainWindow):
         Handles key presses anywhere in the program.
         '''
         
-        if event.key() in [Qt.Key_Control, Qt.Key_Meta]: # Either a Ctrl key in Windows and Linux, or the Command key of a Mac
+        if self.inputMethod == 'Ctrl' and event.key() in [Qt.Key_Control, Qt.Key_Meta]: # Either a Ctrl key in Windows and Linux, or the Command key of a Mac
             if int(event.nativeScanCode()) < 80:
                 # This is a messy work around, and may not always work.
                 # scan code gave 25 and 285 on my Windows 7 machine, and 37 and 105 on my Ubuntu machine for L and R Ctrl respectively.
@@ -92,7 +97,7 @@ class MainScreen(QtGui.QMainWindow):
                 self.ctrlkeytracker[0] += 1
             self.handleCtrlSituation()
         
-        if event.key() == Qt.Key_Space and not event.isAutoRepeat():
+        if self.inputMethod == 'Space' and event.key() == Qt.Key_Space and not event.isAutoRepeat():
             if self.puzzleTimer.isRunning():
                 self.puzzleTimer.stop()
                 self.justStopped = True
@@ -111,8 +116,7 @@ class MainScreen(QtGui.QMainWindow):
         Handles key presses anywhere in the program.
         '''
         
-        keyScanCode = event.nativeScanCode()
-        if event.key() in [Qt.Key_Control, Qt.Key_Meta]: # Either a Ctrl key in Windows and Linux, or the Command key of a Mac
+        if self.inputMethod == 'Ctrl' and event.key() in [Qt.Key_Control, Qt.Key_Meta]: # Either a Ctrl key in Windows and Linux, or the Command key of a Mac
             if int(event.nativeScanCode()) < 80:
                 # This is a messy work around, and I'm not sure it will always work.
                 # print("Left Ctrl released")
@@ -124,7 +128,7 @@ class MainScreen(QtGui.QMainWindow):
                 self.ctrlkeytracker[0] -= 1
             self.handleCtrlSituation()
 
-        if event.key() == Qt.Key_Space and not event.isAutoRepeat():
+        if self.inputMethod == 'Space' and event.key() == Qt.Key_Space and not event.isAutoRepeat():
             if self.justStopped:
                 self.justStopped = False
                 # Prevents the timer from restarting once a Ctrl key is released after stopping.
@@ -146,16 +150,7 @@ class MainScreen(QtGui.QMainWindow):
         
         self.setCentralWidget(self.timerDisplay)
 
-        exitAction = QtGui.QAction(QtGui.QIcon(''), 'Exit', self)
-        exitAction.setShortcut('Ctrl+Q')
-        exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(self.close)
-
-        self.statusBar().showMessage("Ready")
-
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
-        fileMenu.addAction(exitAction)
+        self.buildMenu()
 
         # toolbar = self.addToolBar('Exit')
         # toolbar.addAction(exitAction)
@@ -164,6 +159,47 @@ class MainScreen(QtGui.QMainWindow):
         self.setWindowTitle('Main window')    
         self.show()        
             
+
+    def buildMenu(self):
+        '''
+        Populates the menu bar
+        '''
+
+        menubar = self.menuBar()
+
+        # ===  File menu  ===
+        
+        fileMenu = menubar.addMenu('&File')
+        
+        exitAction = QtGui.QAction('E&xit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(self.close)
+        fileMenu.addAction(exitAction)
+        
+        # ===  Options menu ===
+        
+        optionsMenu = menubar.addMenu('&Options')
+
+        self.optDecimalsChangeAction = QtGui.QAction('&Decimal Places: 2', self)
+        self.optDecimalsChangeAction.triggered.connect(self.changeDecimalPlaces)
+        optionsMenu.addAction(self.optDecimalsChangeAction)
+
+        self.optInputSubMenu = optionsMenu.addMenu('&Input')
+        
+        self.optInputMethods = QtGui.QActionGroup(self, exclusive=True)
+        self.optInputSpace = QtGui.QAction("&Spacebar", self.optInputMethods, checkable=True)
+        self.optInputSubMenu.addAction(self.optInputSpace)
+        self.optInputCtrl = QtGui.QAction("&Ctrl keys", self.optInputMethods, checkable=True)
+        self.optInputSubMenu.addAction(self.optInputCtrl)
+        if self.inputMethod == 'Space':
+            self.optInputSpace.setChecked(True)
+        elif self.inputMethod == 'Ctrl': 
+            self.optInputCtrl.setChecked(True)
+        self.optInputMethods.triggered.connect(self.changeInputMethod)
+        
+
+ 
             
     def loadSettings(self):
         '''
@@ -183,7 +219,6 @@ class MainScreen(QtGui.QMainWindow):
             # Prevents the timer from restarting once a Ctrl key is released after stopping.
             return
         
-        print("Running:", self.puzzleTimer.isRunning(), "... Ctrl keys pressed:", self.ctrlkeytracker)
         if self.puzzleTimer.isRunning():
             if self.ctrlkeytracker[0] == 2:
                 # If the timer was running, and both Ctrl keys are pressed.
@@ -194,7 +229,40 @@ class MainScreen(QtGui.QMainWindow):
                 # If the timer was not running, and one Ctrl key is released after both having been pressed.                
                 self.puzzleTimer.start()
                     
+                    
+    def changeDecimalPlaces(self):
+        '''
+        Toggles the number of decimal places used by the display
+        '''
         
+        if self.decimalPlaces == 2:
+            self.decimalPlaces = 3
+        else:
+            self.decimalPlaces = 2
+            
+        self.optDecimalsChangeAction.setText("Decimal places: "+str(self.decimalPlaces))
+        
+        
+        
+    def changeInputMethod(self):
+        '''
+        Responds to a change in the input method
+        '''
+        if self.optInputSpace.isChecked():
+            self.inputMethod = 'Space'
+        elif self.optInputCtrl.isChecked():
+            self.inputMethod = 'Ctrl'
+            
+    
+        
+    def close(self, *args, **kwargs):
+        '''
+        Performs additional tasks before closing
+        '''
+        
+        print("Finished")
+        
+        super(MainScreen, self).close() # Call the inherited close function
         
         
 class StretchedLabel(QtGui.QLabel):
@@ -213,7 +281,7 @@ class StretchedLabel(QtGui.QLabel):
 
     def resizeEvent(self, evt):
         font = self.font()
-        newSize = min(self.height() * 0.7, self.width() / magicWidthSizeFactor)
+        newSize = min(self.height() * magicHeightSizeFactor, self.width() / magicWidthSizeFactor)
         font.setPixelSize(newSize)
         self.setFont(font)    
     
