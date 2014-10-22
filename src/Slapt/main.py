@@ -217,6 +217,21 @@ class MainScreen(QtGui.QMainWindow):
             self.optInputCtrl.setChecked(True)
         self.optInputMethods.triggered.connect(self.changeInputMethod)
         
+        self.optInspectionSubMenu = optionsMenu.addMenu('Inspection &Timer')
+        
+        self.optInspectionEnabled = QtGui.QAction("&Enabled", self, checkable=True)
+        self.optInspectionEnabled.triggered.connect(self.toggleInspectionTimer)        
+        self.optInspectionSubMenu.addAction(self.optInspectionEnabled)
+        if self.inspectionEnabled:
+            self.optInspectionEnabled.setChecked(True)
+        self.optInspectionChange = QtGui.QAction("&Change time... ("+str(self.inspectionTimeLimit)+" s)", self)
+        self.optInspectionChange.triggered.connect(self.changeInspectionTime)
+        self.optInspectionSubMenu.addAction(self.optInspectionChange)
+        
+        
+        
+        
+        
 
  
             
@@ -328,9 +343,28 @@ class MainScreen(QtGui.QMainWindow):
             self.inputMethod = 'Space'
         elif self.optInputCtrl.isChecked():
             self.inputMethod = 'Ctrl'
+       
+            
+    def toggleInspectionTimer(self):
+        '''
+        Toggles whether or not the inspection timer is enabled
+        '''
+        if self.inspectionEnabled:
+            self.inspectionEnabled = 0
+        else:
+            self.inspectionEnabled = 1
+    
+    
+    def changeInspectionTime(self):
+        '''
+        Bring up a dialog for changing the inspection time
+        '''
+        newTime, ok = QtGui.QInputDialog.getInteger(self, "Change inspection time", "Enter the new inspection time in seconds", value=self.inspectionTimeLimit)
+        if ok:
+            self.inspectionTimeLimit = newTime
+            self.optInspectionChange.setText("&Change time... ("+str(self.inspectionTimeLimit)+" s)")
             
     
-        
     def closeEvent(self, *args, **kwargs):
         '''
         Performs additional tasks before closing
