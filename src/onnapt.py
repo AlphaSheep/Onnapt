@@ -25,7 +25,7 @@ Created on 21 Oct 2014
 
 import sys
 from PyQt4 import QtGui
-from Slapt.main import MainScreen
+from Onnapt.main import MainScreen
 
                   
 def main():

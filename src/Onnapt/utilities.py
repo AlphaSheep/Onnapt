@@ -16,6 +16,7 @@ Created on 21 Oct 2014
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
     IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    
     AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
@@ -25,6 +26,8 @@ Created on 21 Oct 2014
 
 
 import math
+from datetime import datetime
+
 
 def timeToStr(time, nDecimals = 2):
     '''
@@ -91,6 +94,17 @@ def createArray(m, n=0):
         else:
             array.append(0)
     return array
+
+
+def getCurrentDateStamp():
+    '''
+    Returns the date and time right now as a string.
+    '''
+    now = str(datetime.now())
+    if ('.' in now) and (len(now) > now.index('.')+3):
+        now = now[:now.index('.')+3]
+    return now
+    
 
 
 def test():

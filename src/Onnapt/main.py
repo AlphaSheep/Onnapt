@@ -27,9 +27,9 @@ Created on 21 Oct 2014
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt, QTimer
 
-from Slapt.constants import *
-from Slapt.timer import PuzzleTimer
-from Slapt.utilities import timeToStr, makeAllWhitespaceSpaces
+from Onnapt.constants import *
+from Onnapt.timer import PuzzleTimer
+from Onnapt.utilities import timeToStr, makeAllWhitespaceSpaces
 
 
 class MainScreen(QtGui.QMainWindow):

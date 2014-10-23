@@ -23,11 +23,77 @@ Created on 22 Oct 2014
     
 '''
 
-class StatKeeper():
+from datetime import datetime
+
+from Onnapt.utilities import getCurrentDateStamp, timeToStr
+
+
+class SingleTime():
+    '''
+    A single solve with a time, scramble and datestamp.
+    '''
+    
+    def __init__(self, scramble, solveTime, session = None, penalties = None, comment=''):
+        self.dateStamp = getCurrentDateStamp()
+        self.solveTime = solveTime
+        self.session = session
+        self.scramble = scramble
+        self.penalties = penalties
+        self.comment = comment        
+       
+        
+    def getDBString(self):
+        '''
+        Gets a tab separated string for writing to the database
+        '''
+        if self.penalties:
+            penaltyString = self.penalties
+        else:
+            penaltyString = ''
+        if self.session:
+            sessionIDstring = self.session.sessionID
+        else:
+            sessionIDstring = ''
+        return self.dateStamp+'\t'+str(self.solveTime)+'\t'+penaltyString+'\t'+self.scramble+'\t'+sessionIDstring+'\t'+self.comment
+    
+    
+    def getSolveTime(self, nDecimals):
+        '''
+        Returns the time in a convenient format
+        '''
+        return timeToStr(self.solveTime, nDecimals)
+        
+    
+    
+class Session():
     '''
     An object that keeps track of the history for a user
     '''
 
-
     def __init__(self):
-        pass
+        self.sessionID = getCurrentDateStamp()
+        self.solve = []
+    
+    
+    def addSolve(self, solve):
+        self.solves.append(solve)
+        
+        
+    
+    
+
+
+    
+    
+def test():
+    s = Session()
+    import time
+    time.sleep(3.2)
+    t = SingleTime("R U R' U R U2 R'", 83.2)
+    s = SingleTime("R F' R' F", 16.124, s, 'DNF', 'No comment')
+    print(t.getDBString())
+    print(s.getDBString())
+
+
+if __name__ == "__main__":
+    test()
