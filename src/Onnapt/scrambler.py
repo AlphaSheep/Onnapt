@@ -23,13 +23,98 @@ Created on 22 Oct 2014
     
 '''
 
-from Slapt.utilities import createArray
+import random
 
-class CubeScrambler():
+from Onnapt.utilities import listWithout
+
+
+class CubeScramblerByRandomTurns():
     '''
-    Generates a random scrambler for a standard cube puzzle
+    Generates an object which returns random scrambles for a standard cube puzzle
+    Scrambles consist of a number of randomly generated moves
     '''
     
-    def __init__(self):
-        pass
-    
+    def __init__(self, size=3):
+        self.size = size
+        self.getAllowedTurns()
+        self.setScrambleLength(0)
+        self.scrambles = []
+        
+        
+    def setScrambleLength(self, scrambleLength):
+        '''
+        Set the length of the generated scrambles. Set to 0 to use the default length for the puzzle size. 
+        '''
+        if scrambleLength:
+            self.useDefaultLength = False
+            self.scrambleLength = scrambleLength
+        else:
+            self.useDefaultLength = True
+            self.scrambleLength = self.getScrambleLength()
+        
+        
+    def getAllowedTurns(self):
+        '''
+        Builds a list of allowed turns based on the puzzle size
+        '''        
+        postfixes = ["", "'", "2"]        
+        allowedTurns = ["U","F","R"]
+        allowedWideTurns = []
+        if self.size > 2:
+            allowedTurns += ["D","L","B"]            
+        if self.size > 3:
+            allowedWideTurns += ["Uw","Fw","Rw","Dw","Lw","Bw"]
+        prefixes = [""]
+        maxprefix = int(self.size/2)
+        if maxprefix > 2:
+            for i in range(3, maxprefix+1):
+                prefixes.append(str(i))
+        
+        for t in allowedWideTurns:
+            for p in prefixes:
+                allowedTurns.append(p+t)
+        
+        allTurns = [] 
+        for t in allowedTurns:
+            for p in postfixes:
+                allTurns.append(t+p)
+                
+        return allTurns
+        
+        
+    def getScrambleLength(self):
+        '''
+        If a scramble length has been set, then returns that. If not, then it returns a length based on the puzzle size
+        '''
+        if not self.useDefaultLength:
+            return self.scrambleLength
+        elif self.size < 4:
+            return 25
+        elif self.size < 9:
+            return (self.size-2)*20
+        else:
+            return 120
+        
+        
+    def nextScramble(self):
+        length = 0
+        scramble = ''
+        lastTurn = ''
+        allowedTurns = self.getAllowedTurns()
+        while length < self.scrambleLength:            
+            lastBase = lastTurn.rstrip("'2")
+            skip = [lastBase, lastBase+"'", lastBase+"2"]
+            lastTurn = random.choice(listWithout(allowedTurns, skip))
+            scramble += lastTurn+' '
+            length += 1
+        self.scrambles.append(scramble[:-1])
+        return self.scrambles[-1]
+                    
+
+def test():
+    for size in range(2,14):
+        print(size,'x',size,'x',size,'.   ',CubeScramblerByRandomTurns(size).nextScramble(), sep='')
+
+
+if __name__ == "__main__":
+    test()

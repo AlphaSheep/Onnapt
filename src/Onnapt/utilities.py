@@ -105,6 +105,16 @@ def getCurrentDateStamp():
         now = now[:now.index('.')+3]
     return now
     
+    
+def listWithout(l, skipList):
+    '''
+    Returns the list l, but with all elements from skipList removed.
+    '''
+    newList = []
+    for element in l:
+        if not element in skipList:
+            newList.append(element)
+    return newList
 
 
 def test():
@@ -116,6 +126,10 @@ def test():
     print()
     print(makeAllWhitespaceSpaces('   SIZE         804\t\t\t   532'))
     
+    print()
+    print()
+    a = [1,2,3,4,5]
+    print(listWithout(a, [1, 3]))
         
 
 if __name__ == '__main__':
