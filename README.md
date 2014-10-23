@@ -1,18 +1,19 @@
-Statistics Lover's Awesome Puzzle Timer (Slapt)
+Oh No! Not Anonther Puzzle Timer (Onnapt)
 ===============================================
 
-*Slapt* is going to be a cross platform timer application for twisty puzzles such as Rubik's cube. It is still in the early development phase.
+*Onnapt* is going to be a cross platform timer application for twisty puzzles such as Rubik's cube. It is still in the early development phase.
 
-Three features will differentiate *Slapt* from other timing applications:
+Hopefully, three features will be added which will differentiate *Onnapt* from other timing applications:
  * Extensive history tracking, which allows exporting and importing times from other devices, and possible syncronising through Dropbox.
  * Calculation of a wide range of stats, which may be extended using plugins (which will be Python scripts)
  * Support custom scrambles as additional plugins
 
 It is being written in Python 3 using PyQt.
 
+
 License
 -------
-*Slapt* is released under the MIT license, which makes it completely free to use and distribute. A copy of the license should have been included with the program.
+*Onnapt* is released under the MIT license, which makes it completely free to use and distribute. A copy of the license should have been included with the program.
 
 
 Feature wishlist

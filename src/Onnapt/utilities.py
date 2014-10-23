@@ -75,6 +75,24 @@ def makeAllWhitespaceSpaces(string):
 
 
 
+def createArray(m, n=0):
+    '''
+    Initialises a list of length m,
+    or an m x n nested list.
+    '''
+    check2D = n>1
+    array = []
+    for i in range(m):
+        if check2D:
+            row = []
+            for j in range(n):
+                row.append(0)
+            array.append(row)
+        else:
+            array.append(0)
+    return array
+
+
 def test():
     testTimes = [0, 0.554654, 5.2546, 25.45869476 , 124.23124, 3599.8888, 3600, 3601, 4854.546546]
     for t in testTimes:
