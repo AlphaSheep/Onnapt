@@ -1,4 +1,4 @@
-Oh No! Not Anonther Puzzle Timer (Onnapt)
+Oh No! Not Another Puzzle Timer (Onnapt)
 ===============================================
 
 *Onnapt* is going to be a cross platform timer application for twisty puzzles such as Rubik's cube. It is still in the early development phase.
