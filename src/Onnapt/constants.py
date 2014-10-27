@@ -39,7 +39,5 @@ magicWidthSizeFactor = 8 # The maximum width to height ratio of the time display
 magicHeightSizeFactor = 0.9 # The maximum fraction of the available height that may be used by the timer display 
 
 
+scrambleDisplayHeightLimits = [10, 320]
 
-
-if __name__ == '__main__':
-    pass
