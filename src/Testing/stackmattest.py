@@ -26,8 +26,8 @@ Created on 27 Oct 2014
 
 import pyaudio
 import pylab
-import wave
-import sys
+# import wave
+# import sys
 
 import time
 
@@ -65,7 +65,7 @@ def analogToDigital(data, frequency, targetbaud):
             break
 
     if firstJump == 0:
-        print ('no data in chunk')
+        print ('Error: Timer seems to be switched off')
         for i in range(int(len(data)/stepSize)):
             binaryData.append(0)
         return binaryData
@@ -83,12 +83,14 @@ def analogToDigital(data, frequency, targetbaud):
     
     
     
-def getNextDataPos(data, blankDistance=16, dataEnd=False):
+def getNextDataPos(data, blankDistance=16, dataEnd=False, lastData=False):
     '''
     data is a list of 0 and 1. Returns the position at which the data starts, which is after blankDistance zeroes.
     If dataEnd is True, returns the position at which the data ends.
+    If lastData is True, returns the last position
     '''
     blankStart = 0
+    blanksEnd = 0
     blanks = 0
     for i in range(len(data)):
         if data[i] == 1:
@@ -96,13 +98,21 @@ def getNextDataPos(data, blankDistance=16, dataEnd=False):
                 blankStart = i
             blanks += 1
             if blanks >= blankDistance:
-                if dataEnd:
+                if dataEnd and not lastData:
                     return blankStart-1
         else:
             if blanks> blankDistance and not dataEnd:
-                return i
+                blanksEnd = i
+                if not lastData:
+                    return blanksEnd
             else:
                 blanks = 0
+    if lastData:
+        if dataEnd:
+            if blankStart >= blankDistance:
+                return blankStart-1
+        else:
+            return blanksEnd        
     return 0
           
             
@@ -151,6 +161,7 @@ def isolateNextSignal(data):
     return nextSignal, residual
 
 
+
 def getAllSignals(data):
     signals = []
     thisData, residual = isolateNextSignal(data)
@@ -186,29 +197,26 @@ def signalToTime(binaryData):
     #print('Time data: ')
     for t in timeBin:
         num.append(binaryListtoNumber(t)-48)
+        if num[-1] > 9:
+            num[-1] = 0
         checkSum += num[-1]
     #print('Checksum - calculated:', checkSum, ', received: ', recievedCheckSum)
     
         
     if recievedCheckSum == checkSum:
-        print('    '+command+' - Time = {:}:{:}{:}.{:}{:}'.format(num[0],num[1],num[2],num[3],num[4]))
-    else:
-        # print('    '+command+' - Checksum mismatch', num, checkSum)
-        pass
+        # print('    '+command+' - Time = {:}:{:}{:}.{:}{:}'.format(num[0],num[1],num[2],num[3],num[4]))
+        stackmatTime = num[0]*60 + num[1]*10 + num[2] + num[3]/10 + num[4]/100
+        return stackmatTime, command
+    
+    return 0, command
+    
         
         
      
-    
-    
-        
-            
-        
-
-
 
 def main():
     FRAMESIZE = 12000
-    FORMAT = pyaudio.get_format_from_width(1)
+    FORMAT = pyaudio.paUInt8 # pyaudio.get_format_from_width(1)
     CHANNELS = 1
     RATE = 24000
     RECORD_SECONDS = 600
@@ -225,17 +233,31 @@ def main():
     frames = []
     
     startTime = time.time()
+    
+    maxStackmatTime = 0
+    lastcommand = 'I'
 
     for i in range(0, int(RATE / FRAMESIZE * RECORD_SECONDS)):
         data = stream.read(FRAMESIZE)
         # print('{:.2f} seconds of recording remaining'.format(RECORD_SECONDS - (time.time()-startTime)))
         frames.append(data)
+
         if i>1:
-            binaryData = analogToDigital(data+frames[-2], RATE, targetBaud)    
-            signals = getAllSignals(binaryData)
-            for signal in signals:
-                signalToTime(signal)
-            print('--{:.1f}'.format((time.time()-startTime)))
+            data = frames[-2] + data # Include data from the previous frames in case a signal is spread over two frames
+            
+        binaryData = analogToDigital(data, RATE, targetBaud)    
+        signals = getAllSignals(binaryData)
+        for signal in signals:
+            stackmatTime, command = signalToTime(signal)
+            if command == 'I':
+                maxStackmatTime = 0
+            if stackmatTime > maxStackmatTime:
+                maxStackmatTime = stackmatTime
+            if command != '?' and command != lastcommand:
+                print('                                                    command change:',command)
+                lastcommand = command
+        print('Listened for {:.1f} s,     Time displayed = {:.2f} s'.format((time.time()-startTime), maxStackmatTime))
+        
 
     print("* done recording\n--------------\n\n")
 

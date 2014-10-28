@@ -117,6 +117,20 @@ def listWithout(l, skipList):
     return newList
 
 
+def binaryListtoNumber(bList):
+        '''
+        Takes a list of 1s and 0s, and returns the integer value of the binary number.
+        Not that the binary numbers are in reverse (units on the left)
+        '''
+        
+        value = 0
+        power = 0
+        for i in range(len(bList)):
+            value += bList[i] * (2**power)
+            power += 1
+        return value
+
+
 def test():
     testTimes = [0, 0.554654, 5.2546, 25.45869476 , 124.23124, 3599.8888, 3600, 3601, 4854.546546]
     for t in testTimes:
