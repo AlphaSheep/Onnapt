@@ -27,27 +27,27 @@ The South African speed cubing community were asked the following questions:
 
 The following feature wish list was compiled from the answers:
 
- * Display averages
- * Enable/disable inspection time
- * Change length of inspection time
- * Show best and worst times in a session
- * Standard deviation
- * See scrambles for all previous times (not just the last one)
- * Skewb scrambles (WCA official scrambles)
- * Dates for results
- * Visual output, e.g graph
- * Choice of Ctrl buttons or spacebar to start/stop
- * Category manager like Prisma's
- * Shrink to small window
- * Plugin system for adding new scrambles
- * Scramble sub-groups, for PLL, OLL, CMLL+LSE practice.
- * Clear all times for a session
- * Stackmat support
- * Platform independence (Windows, Mac and Linux)
- * Simple configuration
- * Open source
- * Simple default view
- * Multiple profiles, so several people can share a computer
- * Database export/backup
- * Show best Ao5 and Ao12
+ - [ ] Display averages
+ - [x] Enable/disable inspection time
+ - [x] Change length of inspection time
+ - [ ] Show best and worst times in a session
+ - [ ] Standard deviation
+ - [ ] See scrambles for all previous times (not just the last one)
+ - [ ] Skewb scrambles (WCA official scrambles)
+ - [ ] Dates for results
+ - [ ] Visual output, e.g graph
+ - [x] Choice of Ctrl buttons or spacebar to start/stop
+ - [ ] Category manager like Prisma's
+ - [x] Shrink to small window
+ - [ ] Plugin system for adding new scrambles
+ - [ ] Scramble sub-groups, for PLL, OLL, CMLL+LSE practice.
+ - [ ] Clear all times for a session
+ - [ ] Stackmat support
+ - [x] Some platform independence (at least Windows, Mac and Linux)
+ - [ ] Simple configuration
+ - [x] Open source
+ - [x] Simple default view
+ - [ ] Multiple profiles, so several people can share a computer
+ - [ ] Database export/backup
+ - [ ] Show best Ao5 and Ao12
 
