@@ -129,7 +129,7 @@ class Cubie():
         for face in self.faces:
             vertices.append(list(face.vertices))
         return vertices
-    
+
     
     def getColours(self):
         
@@ -197,7 +197,7 @@ class Cubie():
         
         verts = self.getVertices()
         
-        cubie = Poly3DCollection(verts, linewidth=4)
+        cubie = Poly3DCollection(verts, linewidth=2)
         cubie.set_facecolors(self.colours)
         cubie.set_edgecolor('k')
         
@@ -253,11 +253,17 @@ class Cube():
                         self.cubies[pos] = CentreCubie(Point(x,y,z), Point(x,y,z), [0,0,0], self)
                         
                         
-    def turn(self, face, direction, layers):
+    def turn(self, *args):
         '''
         Turns a number of layers about a certain face in a given direction. Face is a number from 0 to 5.
         direction of 1 means a 90deg clockwise turn, 2 means 180deg turn, and -1 means 
         '''
+        
+        print(args)
+        if len(args) == 3:            
+            face, direction, layers = args
+        elif len(args) == 1:
+            face, direction, layers = translateTurn(args[0])
         
         if layers == 0:
             layers = self.nLayers
@@ -276,7 +282,7 @@ class Cube():
             self.singleTurn(face, layers)
             
             
-    def singleTurn (self, face, layers):
+    def singleTurn(self, face, layers):
         
         for cubiePos in self.cubies.keys():
             if self.cubies[cubiePos].inLayer(face, layers):
@@ -284,7 +290,11 @@ class Cube():
         
     
         
-            
+    def applyAlg(self, alg):
+        
+        moves = alg.strip().split(' ')
+        for move in moves:
+            self.turn(move.strip())
                       
                         
     def display(self):
@@ -343,32 +353,53 @@ def translateColours(colours):
     return colourList
 
 
+def translateTurn(turn):
+    
+    turnDict = {'U':0, 'F':1, 'R':2, 'B':3, 'L':4, 'D':5}
+    rotDict = {'x':0, 'y':1, 'z':2}
+
+    wideTurnTranslator = {'u':'Uw', 'f':'Fw', 'r':'Rw', 'b':'Bw', 'l':'Lw', 'd':'Dw'}
+    
+    for w in wideTurnTranslator.keys():
+        turn = turn.replace(w, wideTurnTranslator[w])
+    
+    if turn[-1] in ("'", '2'):
+        postfix = turn[-1]
+        turn = turn[:-1]
+    else: 
+        postfix = ''
+
+    if turn[-1] == 'w':        
+        prefix = turn[:-2]
+        baseTurn = turn[-2]
+        layers = 2
+    else:
+        prefix = turn[:-1]
+        baseTurn = turn[-1]
+        layers = 1
+        
+    if not baseTurn in (list(turnDict.keys()) + list(rotDict.keys())):
+        raise Exception('Unrecognised turn', turn)    
+
+    face = turnDict[baseTurn]
+    
+    if len(prefix)>0:
+        layers = int(prefix)
+    
+    if postfix == "'":
+        direction = 3
+    elif postfix == '2':
+        direction = 2
+    else: 
+        direction = 1
+    
+    return face, direction, layers
+
+
 def main():
-    c = Cube()
-    print('\n\n-  -\n')
-    c.display()    
-    plt.get_current_fig_manager().window.wm_geometry("400x300+0+0")
-    plt.savefig('1.png')
-    print('\n\n- R -\n')
-    c.turn(2, 1, 1)
+    c = Cube(4)
+    c.applyAlg("r2 B2 U2 l U2 r' U2 r U2 F2 r F2 l' B2 r2")
     c.display()
-    plt.get_current_fig_manager().window.wm_geometry("400x300+500+0")
-    plt.savefig('2.png')
-    print('\n\n- R U -\n')
-    c.turn(0, 1, 1)
-    c.display()
-    plt.get_current_fig_manager().window.wm_geometry("400x300+1000+0")
-    plt.savefig('3.png')
-    print('\n\n- R U R'' -\n')
-    c.turn(2, -1, 1)
-    c.display()
-    plt.get_current_fig_manager().window.wm_geometry("400x300+500+400")
-    plt.savefig('4.png')
-    print('\n\n- R U R'' U'' -\n')
-    c.turn(0, -1, 1)
-    c.display()
-    plt.get_current_fig_manager().window.wm_geometry("400x300+1000+400")
-    plt.savefig('5.png')
     plt.show()
 
 
