@@ -97,6 +97,7 @@ class CubeScramblerByRandomTurns():
         
         
     def nextScramble(self):
+        
         length = 0
         scramble = ''
         lastTurn = ''

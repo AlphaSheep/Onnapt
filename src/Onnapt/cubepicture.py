@@ -1,5 +1,5 @@
 '''
-Created on 18 Nov 2014
+Created on 20 Nov 2014
 
     Copyright (c) 2014 Brendan Gray and Sylvermyst Technologies
 
@@ -23,11 +23,68 @@ Created on 18 Nov 2014
     
 '''
 
-import numpy as np
-import matplotlib.pyplot as plt
-
+from matplotlib.figure import Figure
+from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
+from PyQt4 import QtCore, QtGui
+
+
+class CubePicture(FigureCanvas):
+   
+    def __init__(self, parent=None, nLayers=3, cubeColours='wgrboy'):
+        
+        self.nLayers = nLayers
+        self.cubeColours = cubeColours
+        
+        self.figure = Figure()
+        self.axes = self.figure.add_subplot(111, projection='3d')
+        
+        self.axes.patch.set_visible(True)
+        
+        FigureCanvas.__init__(self, self.figure)
+        self.setParent(parent)
+
+        colour = self.palette().color(QtGui.QPalette.Background).getRgbF()
+        print(colour)
+        self.figure.set_facecolor(colour)
+        self.axes.set_axis_bgcolor(colour)
+        
+        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        # self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.updateGeometry()
+        
+        self.cube = Cube(self.axes, self.nLayers, self.cubeColours)
+        
+        
+        
+    def updateScramble(self, scramble):
+        
+        self.axes.cla()
+
+        self.cube = Cube(self.axes, self.nLayers, self.cubeColours)
+        self.cube.applyAlg(scramble)
+        self.cube.display()
+             
+        self.draw()
+        
+        
+    def draw(self):
+        '''
+        Overrides the default draw method to make sure axes and tick lables, etc are cleared first.
+        '''
+        
+        self.axes.set_axis_off()
+        self.axes.set_xticks([],[])
+        self.axes.set_yticks([],[])
+        self.axes.set_zticks([],[])
+
+        for axis in self.axes.w_xaxis, self.axes.w_yaxis, self.axes.w_zaxis:
+            axis.pane.set_visible(False)
+            axis.line.set_visible(False) 
+        FigureCanvas.draw(self)
+        
 
 class Point():
     
@@ -220,7 +277,9 @@ class Cube():
     General class for cubes with 3 or more layers
     '''
     
-    def __init__(self, nLayers=3, colours='wgrboy'):
+    def __init__(self, displayAxes, nLayers=3, colours='wgrboy'):
+        
+        self.axes = displayAxes
         
         self.nLayers = nLayers
         self.colours = translateColours(colours)
@@ -257,7 +316,6 @@ class Cube():
         direction of 1 means a 90deg clockwise turn, 2 means 180deg turn, and -1 means 
         '''
         
-        print(args)
         if len(args) == 3:            
             face, direction, layers = args
         elif len(args) == 1:
@@ -293,24 +351,21 @@ class Cube():
         moves = alg.strip().split(' ')
         for move in moves:
             self.turn(move.strip())
-   
+                      
                         
     def display(self):
         
-        fig = plt.figure()
-        ax = fig.gca(projection='3d')  
-        
-        
-        
         for cubiePos in self.cubies.keys():
-            self.cubies[cubiePos].display(ax)
+            self.cubies[cubiePos].display(self.axes)
         
-        ax.set_aspect("equal")
-        ax.set_xlim([0,self.nLayers])
-        ax.set_ylim([0,self.nLayers])
-        ax.set_zlim([0,self.nLayers])
+        self.axes.set_aspect("equal")
+        self.axes.set_xlim([0,self.nLayers])
+        self.axes.set_ylim([0,self.nLayers])
+        self.axes.set_zlim([0,self.nLayers])
+        self.axes.set_axis_off()
+
         
-        plt.axis('off')
+        
         
      
      
@@ -394,12 +449,3 @@ def translateTurn(turn):
     return face, direction, layers
 
 
-def main():
-    c = Cube(4)
-    c.applyAlg("r2 B2 U2 l U2 r' U2 r U2 F2 r F2 l' B2 r2")
-    c.display()
-    plt.show()
-
-
-if __name__ == '__main__':
-    main()

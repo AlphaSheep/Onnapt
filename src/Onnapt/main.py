@@ -31,6 +31,7 @@ from PyQt4.QtCore import Qt, QTimer
 from Onnapt.constants import *
 from Onnapt.timer import PuzzleTimer
 from Onnapt.scramblebuffer import ScrambleBuffer
+from Onnapt.cubepicture import CubePicture
 from Onnapt.utilities import timeToStr, makeAllWhitespaceSpaces
 
 from Onnapt.scrambler import CubeScramblerByRandomTurns
@@ -79,9 +80,14 @@ class MainScreen(QtGui.QMainWindow):
         self.lastWindowHeight = 250
 
         self.scrambleDisplayHeight = 16
+        
+        self.puzzleSize = 3
+        self.cubeColours = 'wgrboy'
 
-        print('Creating scramble buffer...')        
-        self.scrambleBuffer = ScrambleBuffer(CubeScramblerByRandomTurns(3))
+        print('Creating scramble buffer...')   
+        self.scrambler = CubeScramblerByRandomTurns(self.puzzleSize)
+        # self.scrambler.setScrambleLength(4)
+        self.scrambleBuffer = ScrambleBuffer(self.scrambler)
         print('Scramble buffer ready')
 
 
@@ -103,7 +109,12 @@ class MainScreen(QtGui.QMainWindow):
         
         self.timerDisplay = TimerDisplay("")
         scramblesplitter.addWidget(self.timerDisplay)
-
+        
+        
+        self.cubePicture = CubePicture(self, self.puzzleSize, self.cubeColours)
+        self.cubePicture.setMinimumHeight(bottomDisplayHeight)
+        scramblesplitter.addWidget(self.cubePicture)
+        
         self.setCentralWidget(scramblesplitter)
 
         self.buildMenu()
@@ -113,7 +124,7 @@ class MainScreen(QtGui.QMainWindow):
 
         self.setGeometry(self.lastWindowLeft, self.lastWindowTop, self.lastWindowWidth, self.lastWindowHeight)
         self.scrambleDisplay.setMaximumWidth(self.width())
-        scramblesplitter.setSizes([self.scrambleDisplayHeight, scramblesplitter.height()-self.scrambleDisplayHeight])
+        scramblesplitter.setSizes([self.scrambleDisplayHeight, scramblesplitter.height()-self.scrambleDisplayHeight-bottomDisplayHeight, bottomDisplayHeight])
 
         
         self.setWindowTitle('Oh No! Not Another Puzzle Timer')
@@ -401,6 +412,7 @@ class MainScreen(QtGui.QMainWindow):
         print('Generating new scramble...')
         scramble = self.scrambleBuffer.getNextScramble()
         self.scrambleDisplay.setText(scramble)
+        self.cubePicture.updateScramble(scramble)
         print('Ready.')
         
 

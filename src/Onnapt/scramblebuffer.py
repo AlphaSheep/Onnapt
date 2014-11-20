@@ -78,7 +78,7 @@ class ScrambleBuffer():
         try:
             if not self.buffer.full() or self.fails > scrambleForceUpdateAttempts:
                 newScramble = self.scrambler.nextScramble()
-                print(newScramble)
+#                print(newScramble)
                 self.buffer.put(self.scrambler.nextScramble())
                 self.fails = 0
             else:
