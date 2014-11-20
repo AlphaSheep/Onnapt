@@ -33,6 +33,7 @@ The following feature wish list was compiled from the answers:
  - [ ] Show best and worst times in a session
  - [ ] Standard deviation
  - [ ] See scrambles for all previous times (not just the last one)
+ - [x] Show a picture of the current scramble
  - [ ] Skewb scrambles (WCA official scrambles)
  - [ ] Dates for results
  - [ ] Visual output, e.g graph
