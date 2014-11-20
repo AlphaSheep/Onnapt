@@ -41,11 +41,11 @@ class CubeScramblerByRandomTurns():
         self.scrambles = []
         
         
-    def setScrambleLength(self, scrambleLength):
+    def setScrambleLength(self, scrambleLength=0):
         '''
         Set the length of the generated scrambles. Set to 0 to use the default length for the puzzle size. 
         '''
-        if scrambleLength:
+        if scrambleLength > 0:
             self.useDefaultLength = False
             self.scrambleLength = scrambleLength
         else:

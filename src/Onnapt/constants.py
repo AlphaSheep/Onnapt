@@ -30,7 +30,6 @@ from PyQt4.QtCore import Qt
 debugModeEnabled = True
 targetFPS = 30
 
-
 settingsFileName = 'laststate.cfg'
 
 acceptedInputMethods = ['Space', 'Ctrl']
@@ -41,3 +40,8 @@ magicHeightSizeFactor = 0.9 # The maximum fraction of the available height that 
 
 scrambleDisplayHeightLimits = [10, 320]
 
+scrambleBufferSize = 12 # Number of scrambles to prepare in advance
+scrambleUpdateInterval = 500 # Time in milliseconds to try and add a new scramble to the scramble buffer
+scrambleForceUpdateAttempts = 10 # Force a new update attempt after # failed attempts.
+
+ 

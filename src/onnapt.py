@@ -24,6 +24,8 @@ Created on 21 Oct 2014
 '''
 
 import sys
+import multiprocessing
+
 from PyQt4 import QtGui
 from Onnapt.main import MainScreen
 
@@ -37,5 +39,6 @@ def main():
     
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     main()
     

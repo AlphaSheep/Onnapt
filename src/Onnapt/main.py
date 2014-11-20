@@ -23,13 +23,17 @@ Created on 21 Oct 2014
     
 '''
 
+import threading
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt, QTimer
 
 from Onnapt.constants import *
 from Onnapt.timer import PuzzleTimer
+from Onnapt.scramblebuffer import ScrambleBuffer
 from Onnapt.utilities import timeToStr, makeAllWhitespaceSpaces
+
+from Onnapt.scrambler import CubeScramblerByRandomTurns
 
 
 class MainScreen(QtGui.QMainWindow):
@@ -41,11 +45,14 @@ class MainScreen(QtGui.QMainWindow):
         self.loadSettings()
 
         self.initUI()
-
-
+        
         self.fpsTimer = QTimer()
         self.fpsTimer.timeout.connect(self.updateDisplay)
         self.fpsTimer.start(1000 / targetFPS)  # set targetFPS in constants.
+
+        self.newSolve()
+
+
 
 
     def prepare(self):
@@ -72,6 +79,11 @@ class MainScreen(QtGui.QMainWindow):
         self.lastWindowHeight = 250
 
         self.scrambleDisplayHeight = 16
+
+        print('Creating scramble buffer...')        
+        self.scrambleBuffer = ScrambleBuffer(CubeScramblerByRandomTurns(3))
+        print('Scramble buffer ready')
+
 
 
     def initUI(self):
@@ -239,8 +251,6 @@ class MainScreen(QtGui.QMainWindow):
 
 
 
-        pass
-
 
     def keyPressEvent(self, event):
         '''
@@ -266,6 +276,7 @@ class MainScreen(QtGui.QMainWindow):
             if self.puzzleTimer.isRunning():
                 self.puzzleTimer.stop()
                 self.justStopped = True
+                self.newSolve()
             elif self.inspectionEnabled and not self.inspectionTimer.isRunning():
                 self.inspectionTimer.start()
                 self.justStartedInspection = True
@@ -325,6 +336,7 @@ class MainScreen(QtGui.QMainWindow):
                 # If the timer was running, and both Ctrl keys are pressed.
                 self.puzzleTimer.stop()
                 self.justStopped = True
+                self.newSolve()
         else:
             if self.ctrlkeytracker == [1, 2]:
                 # If the timer was not running, and one Ctrl key is released after both having been pressed.
@@ -382,12 +394,24 @@ class MainScreen(QtGui.QMainWindow):
             self.optInspectionChange.setText("&Change time... (" + str(self.inspectionTimeLimit) + " s)")
 
 
+    def newSolve(self):
+        '''
+        Checks if there are enough scrambles in the scramble buffer. If not, then it generates new scrambles for the buffer.        
+        '''
+        print('Generating new scramble...')
+        scramble = self.scrambleBuffer.getNextScramble()
+        self.scrambleDisplay.setText(scramble)
+        print('Ready.')
+        
+
     def closeEvent(self, *args, **kwargs):
         '''
         Performs additional tasks before closing
         '''
 
         self.saveSettings()
+        
+        
 
 
 class StretchyCenteredDisplay(QtGui.QLabel):
