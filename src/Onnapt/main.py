@@ -80,15 +80,10 @@ class MainScreen(QtGui.QMainWindow):
         self.lastWindowHeight = 250
 
         self.scrambleDisplayHeight = 16
-        
-        self.puzzleSize = 3
-        self.cubeColours = 'wgrboy'
 
-        print('Creating scramble buffer...')   
-        self.scrambler = CubeScramblerByRandomTurns(self.puzzleSize)
-        # self.scrambler.setScrambleLength(4)
-        self.scrambleBuffer = ScrambleBuffer(self.scrambler)
-        print('Scramble buffer ready')
+        self.cubeColours = 'wgrboy'
+        
+        self.changePuzzleType(puzzle='NNNcube', size=3)
 
 
 
@@ -101,19 +96,23 @@ class MainScreen(QtGui.QMainWindow):
         # timerWindow = QtGui.QWidget()
         scramblesplitter = QtGui.QSplitter(Qt.Vertical)
 
-        self.scrambleDisplay = StretchyCenteredDisplay("Scramble goes here")
+        self.scrambleDisplay = ScrambleDisplay(scramblesplitter, "Scramble goes here")
         self.scrambleDisplay.setMinimumHeight(scrambleDisplayHeightLimits[0])
         self.scrambleDisplay.setMaximumHeight(scrambleDisplayHeightLimits[1])
+        self.scrambleDisplay.setWordWrap(True)
         
         scramblesplitter.addWidget(self.scrambleDisplay)
         
         self.timerDisplay = TimerDisplay("")
+        self.timerDisplay.setMinimumHeight(timerDisplayMinimumHeight)
         scramblesplitter.addWidget(self.timerDisplay)
+        scramblesplitter.setCollapsible(1, False)
         
         
         self.cubePicture = CubePicture(self, self.puzzleSize, self.cubeColours)
-        self.cubePicture.setMinimumHeight(bottomDisplayHeight)
+        self.cubePicture.setMinimumHeight(bottomDisplayMinimumHeight)
         scramblesplitter.addWidget(self.cubePicture)
+        
         
         self.setCentralWidget(scramblesplitter)
 
@@ -123,12 +122,13 @@ class MainScreen(QtGui.QMainWindow):
         # toolbar.addAction(exitAction)
 
         self.setGeometry(self.lastWindowLeft, self.lastWindowTop, self.lastWindowWidth, self.lastWindowHeight)
-        self.scrambleDisplay.setMaximumWidth(self.width())
-        scramblesplitter.setSizes([self.scrambleDisplayHeight, scramblesplitter.height()-self.scrambleDisplayHeight-bottomDisplayHeight, bottomDisplayHeight])
+        #self.scrambleDisplay.setMaximumWidth(self.width())
+        scramblesplitter.setSizes([self.scrambleDisplayHeight, scramblesplitter.height()-self.scrambleDisplayHeight-bottomDisplayMinimumHeight, bottomDisplayMinimumHeight])
 
         
         self.setWindowTitle('Oh No! Not Another Puzzle Timer')
         self.show()
+
 
 
     def buildMenu(self):
@@ -180,7 +180,13 @@ class MainScreen(QtGui.QMainWindow):
         self.optInspectionChange.triggered.connect(self.changeInspectionTime)
         self.optInspectionSubMenu.addAction(self.optInspectionChange)
 
+        self.optDecimalsChangeAction = QtGui.QAction("&Decimal places: " + str(self.decimalPlaces), self)
+        self.optDecimalsChangeAction.triggered.connect(self.changeDecimalPlaces)
+        optionsMenu.addAction(self.optDecimalsChangeAction)
 
+        self.scrambleFontAction = QtGui.QAction("&Scramble Font...", self)
+        self.scrambleFontAction.triggered.connect(self.changeScrambleFont)
+        optionsMenu.addAction(self.scrambleFontAction)
 
 
 
@@ -211,7 +217,7 @@ class MainScreen(QtGui.QMainWindow):
                     self.lastWindowLeft = int(line[1])
                     self.lastWindowTop = int(line[2])
 
-                elif line[0] == 'TIME_DECMAL_PLACES':
+                elif line[0] == 'TIME_DECMALStretchyCenteredDisplay_PLACES':
                     self.decimalPlaces = int(line[1])
 
                 elif line[0] == 'INPUT_METHOD' and line[1] in acceptedInputMethods:
@@ -405,6 +411,34 @@ class MainScreen(QtGui.QMainWindow):
             self.optInspectionChange.setText("&Change time... (" + str(self.inspectionTimeLimit) + " s)")
 
 
+    def changeScrambleFont(self):
+        '''
+        Bring up a dialog for changing the inspection time
+        '''
+        
+        tempFont = QtGui.QFont(self.scrambleDisplay.font())
+        tempFont.setFamily(QtGui.QFontInfo(tempFont).family())
+        tempFont.setStyle(QtGui.QFont.StyleNormal)
+        
+        newFont, ok = QtGui.QFontDialog.getFont(tempFont, self, 'Choose the font for the scramble display')
+        if ok:
+            self.scrambleDisplay.setFont(newFont)
+            self.scrambleDisplay.resizeEvent()
+
+
+    def changePuzzleType(self, puzzle, size=None):
+        '''
+        
+        '''
+        if puzzle == 'NNNcube':
+            self.puzzleSize = size
+
+            print('Creating scramble buffer...')   
+            self.scrambler = CubeScramblerByRandomTurns(self.puzzleSize)
+            self.scrambleBuffer = ScrambleBuffer(self.scrambler)
+            print('Scramble buffer ready')
+        
+    
     def newSolve(self):
         '''
         Checks if there are enough scrambles in the scramble buffer. If not, then it generates new scrambles for the buffer.        
@@ -412,6 +446,7 @@ class MainScreen(QtGui.QMainWindow):
         print('Generating new scramble...')
         scramble = self.scrambleBuffer.getNextScramble()
         self.scrambleDisplay.setText(scramble)
+        self.scrambleDisplay.resizeEvent()
         self.cubePicture.updateScramble(scramble)
         print('Ready.')
         
@@ -435,6 +470,7 @@ class StretchyCenteredDisplay(QtGui.QLabel):
         QtGui.QLabel.__init__(self, *args, **kwargs)
         self.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         self.setAlignment(Qt.AlignCenter)
+        
 
 
     def resizeEvent(self, event):
@@ -442,7 +478,23 @@ class StretchyCenteredDisplay(QtGui.QLabel):
         newSize = min(self.height() * magicHeightSizeFactor, self.width() / magicWidthSizeFactor)
         font.setPixelSize(newSize)
         self.setFont(font)
+        
 
+class ScrambleDisplay(QtGui.QLabel):
+
+    def __init__(self, container, *args, **kwargs):
+        self.container = container
+        QtGui.QLabel.__init__(self, *args, **kwargs)
+        self.setAlignment(Qt.AlignCenter)
+        
+
+    def resizeEvent(self, event=None):
+        
+        QtGui.QLabel.resizeEvent(self, event)
+        self.setMinimumHeight(1)
+        self.setFixedHeight(self.heightForWidth(self.container.width()))
+        
+        
 
 class TimerDisplay(StretchyCenteredDisplay):
     '''

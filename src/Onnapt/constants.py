@@ -37,10 +37,10 @@ acceptedInputMethods = ['Space', 'Ctrl']
 magicWidthSizeFactor = 8 # The maximum width to height ratio of the time display
 magicHeightSizeFactor = 0.9 # The maximum fraction of the available height that may be used by the timer display 
 
-
 scrambleDisplayHeightLimits = [10, 320]
 
-bottomDisplayHeight = 250
+timerDisplayMinimumHeight = 24
+bottomDisplayMinimumHeight = 120
 
 scrambleBufferSize = 12 # Number of scrambles to prepare in advance
 scrambleUpdateInterval = 500 # Time in milliseconds to try and add a new scramble to the scramble buffer
