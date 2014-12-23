@@ -62,12 +62,15 @@ class CubePicture(FigureCanvas):
     def updateScramble(self, scramble):
         
         self.axes.cla()
-
+        self.axes.view_init()
+        self.axes.mouse_init()
+        
         self.cube = Cube(self.axes, self.nLayers, self.cubeColours)
         self.cube.applyAlg(scramble)
         self.cube.display()
              
         self.draw()
+        
         
         
     def draw(self):
@@ -82,8 +85,10 @@ class CubePicture(FigureCanvas):
 
         for axis in self.axes.w_xaxis, self.axes.w_yaxis, self.axes.w_zaxis:
             axis.pane.set_visible(False)
-            axis.line.set_visible(False) 
+            axis.line.set_visible(False)
+            
         FigureCanvas.draw(self)
+        
         
 
 class Point():
