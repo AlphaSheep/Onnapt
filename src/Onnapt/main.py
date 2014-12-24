@@ -26,7 +26,7 @@ Created on 21 Oct 2014
 import threading
 
 from PyQt4 import QtGui
-from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtCore import Qt, QTimer, QByteArray
 
 from Onnapt.constants import *
 from Onnapt.timer import PuzzleTimer
@@ -73,11 +73,19 @@ class MainScreen(QtGui.QMainWindow):
 
         self.decimalPlaces = 2
         self.inputMethod = 'Space'
+        
+        self.cubeImageWidth = bottomDisplayMinimumHeight
+        self.bottomPanelHeight = bottomDisplayMinimumHeight
+        
+        self.timerDisplaySplitterSizes = None
+        self.bottomPanelSplitterSizes = None
 
+        self.newScrambleFont = None
+        
         self.lastWindowLeft = 300
         self.lastWindowTop = 300
-        self.lastWindowWidth = 350
-        self.lastWindowHeight = 250
+        self.lastWindowWidth = 700
+        self.lastWindowHeight = 500
 
         self.scrambleDisplayHeight = 16
 
@@ -94,27 +102,38 @@ class MainScreen(QtGui.QMainWindow):
 
 
         # timerWindow = QtGui.QWidget()
-        scramblesplitter = QtGui.QSplitter(Qt.Vertical)
+        self.scramblesplitter = QtGui.QSplitter(Qt.Vertical)
+        self.bottomSplitter = QtGui.QSplitter(Qt.Horizontal)
 
-        self.scrambleDisplay = ScrambleDisplay(scramblesplitter, "Scramble goes here")
+        self.scrambleDisplay = ScrambleDisplay(self.scramblesplitter, "Scramble goes here")
         self.scrambleDisplay.setMinimumHeight(scrambleDisplayHeightLimits[0])
         self.scrambleDisplay.setMaximumHeight(scrambleDisplayHeightLimits[1])
         self.scrambleDisplay.setWordWrap(True)
+        if not self.newScrambleFont is None:
+            self.scrambleDisplay.setFont(self.newScrambleFont)
+        else:
+            displayFont = self.scrambleDisplay.font()
+            displayFont.setPointSize(timerDisplayDefaultFontSize)
+            self.scrambleDisplay.setFont(displayFont)
+             
         
-        scramblesplitter.addWidget(self.scrambleDisplay)
+        self.scramblesplitter.addWidget(self.scrambleDisplay)
         
         self.timerDisplay = TimerDisplay("")
         self.timerDisplay.setMinimumHeight(timerDisplayMinimumHeight)
-        scramblesplitter.addWidget(self.timerDisplay)
-        scramblesplitter.setCollapsible(1, False)
+        self.scramblesplitter.addWidget(self.timerDisplay)
+        self.scramblesplitter.setCollapsible(1, False)
         
+        placeHolder = QtGui.QLabel("Placeholder")
+        self.bottomSplitter.addWidget(placeHolder)
         
         self.cubePicture = CubePicture(self, self.puzzleSize, self.cubeColours)
         self.cubePicture.setMinimumHeight(bottomDisplayMinimumHeight)
-        scramblesplitter.addWidget(self.cubePicture)
+        self.bottomSplitter.addWidget(self.cubePicture)
+
+        self.scramblesplitter.addWidget(self.bottomSplitter)
         
-        
-        self.setCentralWidget(scramblesplitter)
+        self.setCentralWidget(self.scramblesplitter)
 
         self.buildMenu()
 
@@ -123,7 +142,18 @@ class MainScreen(QtGui.QMainWindow):
 
         self.setGeometry(self.lastWindowLeft, self.lastWindowTop, self.lastWindowWidth, self.lastWindowHeight)
         #self.scrambleDisplay.setMaximumWidth(self.width())
-        scramblesplitter.setSizes([self.scrambleDisplayHeight, scramblesplitter.height()-self.scrambleDisplayHeight-bottomDisplayMinimumHeight, bottomDisplayMinimumHeight])
+        self.scramblesplitter.setSizes([self.scrambleDisplayHeight, self.scramblesplitter.height()-self.scrambleDisplayHeight-bottomDisplayMinimumHeight, self.bottomPanelHeight])
+        self.bottomSplitter.setSizes([self.bottomSplitter.width()-self.cubeImageWidth, self.cubeImageWidth])
+
+        if not self.timerDisplaySplitterSizes is None:
+            self.scramblesplitter.restoreState(self.timerDisplaySplitterSizes) 
+        if not self.bottomPanelSplitterSizes is None:
+            self.bottomSplitter.restoreState(self.bottomPanelSplitterSizes) 
+
+        
+        #self.scrambleDisplay.setFrameStyle(QtGui.QFrame.StyledPanel)
+        self.timerDisplay.setFrameStyle(QtGui.QFrame.StyledPanel)
+        #self.cubePicture.setFrameStyle(QtGui.QFrame.StyledPanel)
 
         
         self.setWindowTitle('Oh No! Not Another Puzzle Timer')
@@ -151,10 +181,6 @@ class MainScreen(QtGui.QMainWindow):
         # ===  Options menu ===
 
         optionsMenu = menubar.addMenu('&Options')
-
-        self.optDecimalsChangeAction = QtGui.QAction("&Decimal places: " + str(self.decimalPlaces), self)
-        self.optDecimalsChangeAction.triggered.connect(self.changeDecimalPlaces)
-        optionsMenu.addAction(self.optDecimalsChangeAction)
 
         self.optInputSubMenu = optionsMenu.addMenu('&Input')
 
@@ -229,12 +255,21 @@ class MainScreen(QtGui.QMainWindow):
                 elif line[0] == 'INSPECTION_TIME':
                     self.inspectionTimeLimit = int(line[1])
 
+                elif line[0] == 'SCRAMBLE_FONT':
+                    fontStartPos = settings[i].find(line[1])
+                    self.newScrambleFont = QtGui.QFont()
+                    self.newScrambleFont.fromString(settings[i][fontStartPos:].strip())
+
+                elif line[0] == 'TIMER_DISPLAY_SETTINGS':
+                    self.timerDisplaySplitterSizes = QByteArray.fromHex(line[1].split("'")[1])
+
+                elif line[0] == 'BOTTOM_PANEL_SETTINGS':
+                    self.bottomPanelSplitterSizes = QByteArray.fromHex(line[1].split("'")[1])
+                    
             except:
                 print("Error reading line", i, "in settings file")
                 print("    " + settings[i].strip())
-
-
-
+            
 
     def saveSettings(self):
         '''
@@ -248,6 +283,9 @@ class MainScreen(QtGui.QMainWindow):
             settingsFile.write('INPUT_METHOD ' + self.inputMethod + '\n')
             settingsFile.write('INSPECTION_ENABLED ' + str(self.inspectionEnabled) + '\n')
             settingsFile.write('INSPECTION_TIME ' + str(self.inspectionTimeLimit) + '\n')
+            settingsFile.write('SCRAMBLE_FONT ' + str(self.scrambleDisplay.font().toString()) + '\n')
+            settingsFile.write('TIMER_DISPLAY_SETTINGS ' + str(self.scramblesplitter.saveState().toHex()) + '\n')
+            settingsFile.write('BOTTOM_PANEL_SETTINGS ' + str(self.bottomSplitter.saveState().toHex()) + '\n')
 
 
 
@@ -258,14 +296,37 @@ class MainScreen(QtGui.QMainWindow):
         '''
 
         if self.inspectionTimer.isRunning():
-            currentTime = self.inspectionTimeLimit - self.inspectionTimer.getTime() + 1
-            self.timerDisplay.setText(timeToStr(currentTime, 0))
+            currentTime = self.inspectionTimeLimit - self.inspectionTimer.getTime()
+            self.timerDisplay.setText(timeToStr(currentTime, self.decimalPlaces))
+
+            if currentTime < 0:
+                palette = self.timerDisplay.palette()
+                palette.setColor(QtGui.QPalette.WindowText, Qt.red)
+                self.timerDisplay.setPalette(palette)
+            elif currentTime < self.inspectionTimeLimit * inspection2ndWarnFrac:
+                palette = self.timerDisplay.palette()
+                palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(255,128,0))
+                self.timerDisplay.setPalette(palette)
+            elif currentTime < self.inspectionTimeLimit * inspection1stWarnFrac:
+                palette = self.timerDisplay.palette()
+                palette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(192,192,32))
+                self.timerDisplay.setPalette(palette)
+            else:
+                palette = self.timerDisplay.palette()
+                palette.setColor(QtGui.QPalette.WindowText, Qt.darkGreen)
+                self.timerDisplay.setPalette(palette)
 
         else:
+            colour = self.palette().color(QtGui.QPalette.WindowText)
+            palette = self.timerDisplay.palette()
+            palette.setColor(QtGui.QPalette.WindowText, colour)
+            self.timerDisplay.setPalette(palette)
+
             currentTime = self.puzzleTimer.getTime()
             self.timerDisplay.setText(timeToStr(currentTime, self.decimalPlaces))
 
 
+            
 
 
 
@@ -289,14 +350,16 @@ class MainScreen(QtGui.QMainWindow):
             self.handleCtrlSituation()
 
         if self.inputMethod == 'Space' and event.key() == Qt.Key_Space and not event.isAutoRepeat():
+
             self.justStartedInspection = False
             if self.puzzleTimer.isRunning():
                 self.puzzleTimer.stop()
                 self.justStopped = True
                 self.newSolve()
-            elif self.inspectionEnabled and not self.inspectionTimer.isRunning():
-                self.inspectionTimer.start()
-                self.justStartedInspection = True
+            else:
+                displayFont = self.timerDisplay.font()
+                displayFont.setItalic(True)
+                self.timerDisplay.setFont(displayFont)
 
         if debugModeEnabled:
             if event.key() == Qt.Key_A:
@@ -325,12 +388,22 @@ class MainScreen(QtGui.QMainWindow):
             self.handleCtrlSituation()
 
         if self.inputMethod == 'Space' and event.key() == Qt.Key_Space and not event.isAutoRepeat():
+            displayFont = self.timerDisplay.font()
+            displayFont.setItalic(False)
+            self.timerDisplay.setFont(displayFont)
+            
             if self.justStopped:
                 self.justStopped = False
                 # Prevents the timer from restarting once a Ctrl key is released after stopping.
+                
+            elif self.inspectionEnabled and not self.inspectionTimer.isRunning():
+                self.inspectionTimer.start()
+                self.justStartedInspection = True
+
             elif not self.puzzleTimer.isRunning() and not self.justStartedInspection:
                 self.inspectionTimer.stop()
                 self.puzzleTimer.start()
+                
 
 
 

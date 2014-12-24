@@ -40,18 +40,18 @@ class CubePicture(FigureCanvas):
         
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111, projection='3d')
+        self.figure.subplots_adjust(left=0.0, bottom=0.0, right=1.0, top=1.0)
         
         self.axes.patch.set_visible(True)
         
         FigureCanvas.__init__(self, self.figure)
         self.setParent(parent)
 
-        colour = self.palette().color(QtGui.QPalette.Background).getRgbF()
-        print(colour)
+        colour = self.palette().color(QtGui.QPalette.Window).getRgbF()
         self.figure.set_facecolor(colour)
         self.axes.set_axis_bgcolor(colour)
         
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
         # self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.updateGeometry()
         
@@ -367,7 +367,7 @@ class Cube():
         self.axes.set_xlim([0,self.nLayers])
         self.axes.set_ylim([0,self.nLayers])
         self.axes.set_zlim([0,self.nLayers])
-        self.axes.set_axis_off()
+        #self.axes.set_axis_off()
 
         
         
